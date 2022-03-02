@@ -1,71 +1,121 @@
-// search btn
-const searchBtn = () => {
-  const searchField = document.getElementById("search-field");
-  const searchValue = searchField.value;
+//error message
+const error = document.getElementById("error");
+//clear field function
+const clearField = () => {
+  const phoneContainer = document.getElementById("phone-container");
+  phoneContainer.innerHTML = "";
+  const infoContainer = document.getElementById("info-container");
+  infoContainer.innerHTML = "";
+};
 
-  const url = `https://openapi.programming-hero.com/api/phones?search=${searchValue}`;
+//fetch phone data
+const phone = () => {
+  //get input value
 
-  fetch(url)
+  const inputField = document.getElementById("input-field");
+  const searchText = inputField.value;
+  document.getElementById("input-field").value = "";
+  //error handleing
+
+  if (searchText === typeof "number" || searchText == "") {
+    error.innerText = "Please Search By Phone Name..!";
+    clearField();
+  } else if (searchText < 0) {
+    error.innerText = "Sorry You Can't used Negative value..!";
+    clearField();
+  } else {
+    const url = ` https://openapi.programming-hero.com/api/phones?search=${searchText}`;
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data.length === 0) {
+          clearField();
+          error.innerText = "Sorry No Result Found..!";
+        } else {
+          showPhone(data.data.slice(0, 20));
+          error.innerText = " ";
+        }
+      });
+  }
+};
+
+const showPhone = (phones) => {
+  const phoneContainer = document.getElementById("phone-container");
+  phoneContainer.innerHTML = "";
+  const infoContainer = document.getElementById("info-container");
+  infoContainer.innerHTML = "";
+
+  phones.forEach((phone) => {
+    const div = document.createElement("div");
+    div.classList.add("col");
+    div.innerHTML = ` 
+    <div class="card p-3 text-center shadow-lg ">
+    <img  src="${phone.image}" class="card-img-top  w-50 mx-auto" alt="...">
+    <div class="card-body border-0  ">
+      <h5 class="card-title">Brand: ${phone.brand}</h5>
+      <p class="card-text"> Model: ${phone.phone_name}</p>
+      <button onClick="moreInfo('${phone.slug}')" class="btn btn-info text-white">Details</button>
+    </div>
+  </div>
+     `;
+    phoneContainer.appendChild(div);
+  });
+};
+
+//fetch details api
+const moreInfo = (id) => {
+  fetch(`https://openapi.programming-hero.com/api/phone/${id}`)
     .then((res) => res.json())
-    .then((data) => displayPhone(data.data));
+    .then((data) => showInfo(data.data));
 };
 
-const displayPhone = (data) => {
-  // console.log(data);
-  data.forEach(data => {
-    console.log(data)
-     const phoneCard = document.getElementById("phone-container");
-     const div = document.createElement("div");
-     div.innerHTML = `<div class="card">
-<img class="w-50 imgBox" src="${data.image}" /> <div class="card-textBox">
-<h5>${data.phone_name}</h5>
-<h6>${data.brand}</h6>
-<p class="card-text">
-Some quick example text to build on the card title and make up the bulk of the card's
-content. </p>
-
-<a id='detailsBtn' onclick="loadPhoneDetail('${status.data}')" href="#" class="btn btn-primary">Details</a>
+const showInfo = (information) => {
+  const infoContainer = document.getElementById("info-container");
+  infoContainer.innerHTML = "";
+  const div = document.createElement("div");
+  div.classList.add("col");
+  div.innerHTML = ` 
+  <div class="card p-3 shadow-lg">
+  <img   src="${information.image}" class="card-img-top img-fluid w-50 mx-auto" alt="...">
+  <div class="card-body">
+    <p class="card-title"> <span class="fw-bold">Brand</span> : ${information.brand}</p>
+    <p class="card-text"> <span class="fw-bold">Model</span> : ${information.name}</p>
+    <p class="card-text"><span class="fw-bold"> ChipSet</span> : ${
+      information.mainFeatures.chipSet
+    }</p>
+    <p class="card-text"> <span class="fw-bold"> Disply Size</span> : ${
+      information.mainFeatures.displaySize
+    }</p>
+    <p class="card-text"> <span class="fw-bold">Memory</span>  : ${
+      information.mainFeatures.memory
+    }</p>
+    <p class="card-text"> <span class="fw-bold">Sensor</span>  : ${
+      information.mainFeatures.sensors
+    }</p>
+    <p id="date" class="card-text"> <span class="fw-bold">Relese Date</span>  : ${
+      information.releaseDate ? information.releaseDate : "Not Found"
+    } </p>
+    <p class="text-center text-info">Others Information <br> _________</p>
+    <p class="card-text"> <span class="fw-bold">NFC</span>  : ${
+      information?.others?.NFC ? information.others.NFC : "NFC Not Found"
+    }</p>
+    <p class="card-text"> <span class="fw-bold">Bluetooth</span>  : ${
+      information?.others?.Bluetooth ? information.others.Bluetooth : " Not Found"
+    }</p>
+    <p class="card-text"> <span class="fw-bold">Radio</span>  : ${
+      information?.others?.Radio ? information.others.Radio : "Not Found"
+    }</p>
+    <p class="card-text"> <span class="fw-bold">Usb</span>  : ${
+      information?.others?.USB ? information.others.USB : "Not Found"
+    }</p>
+    <p class="card-text"> <span class="fw-bold">GPS</span>  : ${
+      information?.others?.GPS ? information.others.GPS : "Not Found"
+    }</p>
+    <p class="card-text"> <span class="fw-bold">WALN</span>  : ${
+      information?.others?.WLAN ? information.others.WLAN : "Not Found"
+    }</p>
+  </div>
 </div>
-</div>`;
-
-     phoneCard.appendChild(div);
- })
+  `;
+  infoContainer.appendChild(div);
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const displayResult = (data) => {
-// //   // console.log(data)
-// //   const searchResult = document.getElementById("search-result");
-// //   searchResult.textContent = '';
-// //   // console.log(searchResult);
-// //   data.forEach(oneData => {
-
-//    console.log(oneData)
-//     const div = document.createElement('div');
-//    div.classList.add('col');
-// //     div.innerHTML = ` `;
-// //     searchResult.appendChild(div)
-// //   });
-// // };
-
-// // // details section
-
-// // const loadPhoneDetail = (info) => {
-// //   console.log('hhello',info);
-// // };
